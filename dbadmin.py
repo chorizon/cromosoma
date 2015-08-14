@@ -20,6 +20,8 @@ def start():
     
     args = parser.parse_args()
     
+    init()
+    
     #Import config
     
     try:

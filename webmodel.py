@@ -101,7 +101,7 @@ class WebModel:
         if WebModel.make_connection(SqlClass, self.connections[self.connection_id])==False:
             raise NameError(SqlClass.error_connection)
         
-        WebModel.make_connection=self.dummy_connect
+        WebModel.make_connection=SqlClass.dummy_connect
     
     def dummy_connect(self, connection):
         return True
