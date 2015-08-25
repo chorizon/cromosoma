@@ -6,6 +6,7 @@ import uuid
 from importlib import import_module, reload
 from collections import OrderedDict
 from cromosoma.databases.mysql import SqlClass
+from cromosoma import coreforms
 
 # The most important class for the framework
 #
@@ -661,16 +662,21 @@ class PhangoField:
         # Simple property for make more easy identify foreignkeyfields.
         
         self.foreignkey=False
+        
+        # Property that define the default value for this field
+        
+        self.default_value=""
      
     # This method is used for describe the new field in a sql language format.
     
 
     def get_type_sql(self):
 
-        return 'VARCHAR('+str(self.size)+') NOT NULL DEFAULT ""'
+        return 'VARCHAR('+str(self.size)+') NOT NULL DEFAULT "'+self.default_value+'"'
     
     def show_formatted(self, value):
-        pass
+        
+        return value
     
     # This method for check the value
     
@@ -692,6 +698,12 @@ class PhangoField:
     
     def set_relationships(self):
         pass
+    
+    def create_form(self):
+        form=BaseForm(self.name, self.value)
+        form.default_value=self.default_value
+        form.required=self.required
+        return form
 
 class PrimaryKeyField(PhangoField):
     
