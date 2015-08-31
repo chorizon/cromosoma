@@ -753,9 +753,9 @@ class PhangoField:
 class PrimaryKeyField(PhangoField):
     
     def __init__(self, name, size=11, required=False):
+        super(PrimaryKeyField, self).__init__(name, size, required)
         self.protected=True
         self.name_form=HiddenForm
-        super(PrimaryKeyField, self).__init__(name, size, required)
     
     def check(self, value):
         

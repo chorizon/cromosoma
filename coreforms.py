@@ -15,7 +15,7 @@ class BaseForm:
         
     def form(self):
         
-        return '<input type="'+self.type+'" class="'+self.css+'" name="'+self.setform(self.default_value)+'">'
+        return '<input type="'+self.type+'" class="'+self.css+'" name="'+self.name+'" value="'+self.setform(self.default_value)+'">'
     
     #Method for escape value for html input
     
@@ -31,12 +31,12 @@ class TextForm(BaseForm):
 class PasswordForm(BaseForm):
     
     def __init__(self, name, value):
-        self.type='password'
         super(PasswordForm, self).__init__(name, value)
+        self.type='password'
 
 class HiddenForm(BaseForm):
     
     def __init__(self, name, value):
+        super(HiddenForm, self).__init__(name, value)
         self.type='hidden'
-        super(PasswordForm, self).__init__(name, value)
        
