@@ -6,6 +6,7 @@ class BaseForm:
     
     def __init__(name, value):
         
+        self.label=name
         self.name=name
         self.default_value=value
         self.css=''
@@ -26,3 +27,16 @@ class TextForm(BaseForm):
     
     def __init__(name, value):
         super(TextForm, self).__init__(name, value)
+
+class PasswordForm(BaseForm):
+    
+    def __init__(name, value):
+        self.type='password'
+        super(PasswordForm, self).__init__(name, value)
+
+class HiddenForm(BaseForm):
+    
+    def __init__(name, value):
+        self.type='hidden'
+        super(PasswordForm, self).__init__(name, value)
+       

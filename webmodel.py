@@ -6,7 +6,7 @@ import uuid
 from importlib import import_module, reload
 from collections import OrderedDict
 from cromosoma.databases.mysql import SqlClass
-from cromosoma import coreforms
+from cromosoma.coreforms import BaseForm, HiddenForm
 
 # The most important class for the framework
 #
@@ -52,7 +52,9 @@ class WebModel:
         
         self.related=[]
         
-        self.forms={}
+        #A dictionary where forms of this model are saved
+        
+        self.forms=OrderedDict()
         
         self.cache_method=''
         
@@ -78,6 +80,8 @@ class WebModel:
         
         #Create id field
         self.register(PrimaryKeyField(self.name_field_id))
+        
+        self.model[name]=self
         
     
     # A method for register the fields
@@ -506,6 +510,13 @@ class WebModel:
         update_values=[]
         self.errors[errors_set]=[]
         
+        #A dictionary that define if update property is added
+        
+        updated_field={}
+        updated_field['insert']=0
+        updated_field['update']=1
+        
+        
         error=False
         
         if yes_update==True:
@@ -529,6 +540,8 @@ class WebModel:
                 value=dict_values[k]
                 
                 if self.fields[k].protected==None or external_agent==False:
+                    
+                    self.fields[k].update=updated_field[errors_set]
                     
                     value=self.fields[k].check(value)
                     
@@ -598,8 +611,21 @@ class WebModel:
     
     #Create a form based in table.
     
-    def create_form():
-        pass
+    def create_forms():
+        
+        for name_field, field in self.fields.items():
+            self.forms[name_field]=field.create_form()
+            
+    def create_form_after(field_after, new_form):
+        
+        new_dict=OrderedDict()
+        
+        for name_field, field in self.fields.items():
+            new_dict[name_field]=field
+            if name_field==field_after:
+                new_dict[new_form.name]=new_form
+                
+        self.forms=new_dict
     
     @staticmethod
     def close():
@@ -618,9 +644,20 @@ class PhangoField:
     
     def __init__(self, name, size=255, required=False):
         
+        # The name of the field in database table
+        
         self.name=name
-        self.required=required
+        
+        # The label for the Field
+        
         self.label=name
+        
+        # If field is required, self.required is True
+        
+        self.required=required
+        
+        # The size of field in database
+        
         self.size=size
         
         # Protected, if this value != None, cannot use it in insert or update.
@@ -650,7 +687,6 @@ class PhangoField:
     
         self.name_model=''
         
-        
         # Property used for set this field how indexed in the database table.
 
         self.indexed=False
@@ -666,6 +702,14 @@ class PhangoField:
         # Property that define the default value for this field
         
         self.default_value=""
+     
+        # Property that define if this field is in an update operation or insert operation
+        
+        self.update=0
+        
+        # Define the form, when is created forms with create_forms you can change the properties of this class
+        
+        self.name_form=BaseForm
      
     # This method is used for describe the new field in a sql language format.
     
@@ -700,15 +744,17 @@ class PhangoField:
         pass
     
     def create_form(self):
-        form=BaseForm(self.name, self.value)
+        form=self.name_form(self.name, self.value)
         form.default_value=self.default_value
         form.required=self.required
+        form.label=self.label
         return form
 
 class PrimaryKeyField(PhangoField):
     
     def __init__(self, name, size=11, required=False):
         self.protected=True
+        self.name_form=HiddenForm
         super(PrimaryKeyField, self).__init__(name, size, required)
     
     def check(self, value):

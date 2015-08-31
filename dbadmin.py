@@ -26,13 +26,13 @@ def start():
     
     try:
     
-        config=import_module('config')
+        config=import_module('settings.config')
         
     except:
         e = sys.exc_info()[0]
         v = sys.exc_info()[1]
             
-        print(Fore.WHITE+Back.RED+Style.BRIGHT +"Config file not found: %s %s" % (e, v))
+        print(Fore.WHITE+Back.RED+Style.BRIGHT+"Config file not found: %s %s" % (e, v))
         
         exit(1)
     
@@ -294,6 +294,10 @@ def create_backup(original_file_path, file_path):
     for line in f:
         new_line=line.replace("model[\"", "model[\"old_")
         new_line=new_line.replace("model['", "model['old_")
+        
+        new_line=new_line.replace("WebModel(\"", "WebModel(\"old_")
+        new_line=new_line.replace("WebModel('", "WebModel('old_")
+        
         new_file+=new_line
     
     f.close()

@@ -1,4 +1,5 @@
 from cromosoma.webmodel import PhangoField
+from cromosoma import coreforms
 
 class IntegerField(PhangoField):
     
@@ -15,7 +16,6 @@ class IntegerField(PhangoField):
             txt_error="The value is zero"
             error=True
             
-        
         return value
     
     def get_type_sql(self):
@@ -25,6 +25,20 @@ class IntegerField(PhangoField):
 class CharField(PhangoField):
     
     pass
+
+class PasswordField(PhangoField):
+    
+    def __init__(self, name, size=255, required=False):
+        self.protected=True
+        super(PasswordField, self).__init__(name, size, required)
+        
+    def create_form(self):
+        form=coreforms.PasswordForm(self.name, self.value)
+        form.default_value=self.default_value
+        form.required=self.required
+        form.label=self.label
+        return form
+    
 
 class ForeignKeyField(IntegerField):
     
@@ -43,3 +57,4 @@ class ForeignKeyField(IntegerField):
         super(ForeignKeyField, self).__init__(name, size, required)
     
         self.foreignkey=True
+        
