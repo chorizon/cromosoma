@@ -30,14 +30,7 @@ class PasswordField(PhangoField):
     
     def __init__(self, name, size=255, required=False):
         self.protected=True
-        super(PasswordField, self).__init__(name, size, required)
-        
-    def create_form(self):
-        form=coreforms.PasswordForm(self.name, self.value)
-        form.default_value=self.default_value
-        form.required=self.required
-        form.label=self.label
-        return form
+        super(PasswordField, self).__init__(name, size, required)    
     
 
 class ForeignKeyField(IntegerField):

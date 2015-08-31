@@ -593,7 +593,7 @@ class WebModel:
     
     #Reset the require field in fields
     
-    def reset_require():
+    def reset_require(self):
 
         for k, v in self.fields.items():
 
@@ -603,7 +603,7 @@ class WebModel:
     
     #Reload the require field in fields
     
-    def reload_require():
+    def reload_require(self):
         
         for k,r in self.fields.items():
             self.fields[k].required=r
@@ -611,7 +611,7 @@ class WebModel:
     
     #Create a form based in table.
     
-    def create_forms():
+    def create_forms(self):
         
         for name_field, field in self.fields.items():
             self.forms[name_field]=field.create_form()
@@ -744,7 +744,7 @@ class PhangoField:
         pass
     
     def create_form(self):
-        form=self.name_form(self.name, self.value)
+        form=self.name_form(self.name, self.default_value)
         form.default_value=self.default_value
         form.required=self.required
         form.label=self.label
