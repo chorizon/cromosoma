@@ -70,7 +70,7 @@ class WebModel:
         
         self.conditions="WHERE 1=1"
         
-        self.order_by="`"+self.name+"`.`id` ASC"
+        self.order_by="ORDER BY `"+self.name+"`.`id` ASC"
         
         self.limit=""
         
@@ -250,7 +250,7 @@ class WebModel:
             self.query_error="Error: without fields to search"
             return False
         
-        sql= ("select "+", ".join(final_fields)+extra_sql_field+" from "+", ".join(tables_to_select)+' '+conditions+' ORDER BY '+self.order_by+' '+self.limit).strip()
+        sql= ("select "+", ".join(final_fields)+extra_sql_field+" from "+", ".join(tables_to_select)+' '+conditions+' '+self.order_by+' '+self.limit).strip()
         
         self.last_query=sql
         
