@@ -276,7 +276,7 @@ class WebModel:
     
     def element_exists(self, id):
         
-        self.conditions='where '+self.name_field_id+'='+str(id)
+        self.conditions='WHERE `'+self.name_field_id+'`='+str(id)
         
         count=self.select_count(self.name_field_id)
         
@@ -292,7 +292,7 @@ class WebModel:
     
     def select_a_row(self, id, fields_selected=[], raw_query=0):
         
-        self.conditions='where `'+self.name+'`.`'+self.name_field_id+'`='+str(id)
+        self.conditions='WHERE `'+self.name+'`.`'+self.name_field_id+'`='+str(id)
         
         self.limit="limit 1"
         
@@ -650,7 +650,7 @@ class PhangoField:
         
         # The label for the Field
         
-        self.label=name
+        self.label=name.replace('_', ' ').title()
         
         # If field is required, self.required is True
         

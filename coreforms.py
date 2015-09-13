@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+from collections import OrderedDict
+
 #Forms para python3
 
 class BaseForm:
@@ -39,4 +41,24 @@ class HiddenForm(BaseForm):
     def __init__(self, name, value):
         super(HiddenForm, self).__init__(name, value)
         self.type='hidden'
-       
+
+"""
+class SelectForm(BaseForm):
+	
+	def form(self):
+		
+		the_form='<select name="">\n'
+		
+		for k,v in arr_select.items():
+			pass
+		
+		the_form+='</select>\n'
+		
+		pass
+    
+    def __init__(self, name, value):
+		
+		self.arr_select=OrderedDict()
+		
+        super(SelectForm, self).__init__(name, value)
+"""
