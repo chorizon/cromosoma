@@ -18,15 +18,22 @@ def start():
 
     parser.add_argument('--model', help='Model python path', required=True)
     
+    parser.add_argument('--config', help='The config file', required=False)
+    
     args = parser.parse_args()
     
     init()
     
     #Import config
     
+    config_file='config'
+    
+    if args.config!=None:
+        config_file=args.config
+    
     try:
     
-        config=import_module('settings.config')
+        config=import_module('settings.'+config_file)
         
     except:
         e = sys.exc_info()[0]
