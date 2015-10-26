@@ -68,7 +68,7 @@ class WebModel:
         
         self.query_error=""
         
-        self.conditions="WHERE 1=1"
+        self.conditions=["WHERE 1=1", []]
         
         self.order_by="ORDER BY `"+self.name+"`.`id` ASC"
         
@@ -113,9 +113,9 @@ class WebModel:
     
     # Static method for make queries
     @staticmethod
-    def query(WebModel, str_query):
+    def query(WebModel, str_query, args=[], connection_id='default'):
         WebModel.connect_to_db(WebModel)
-        return SqlClass.query(SqlClass, str_query)
+        return SqlClass.query(SqlClass, str_query, args, connection_id)
     
     # Insert method, for insert a row in database.using a dictionary
     # External agent define if the update is in code or from external source, how a form.
@@ -137,7 +137,7 @@ class WebModel:
         
         self.reset_conditions()
         
-        if SqlClass.query(SqlClass, sql):
+        if SqlClass.query(SqlClass, sql, self.conditions[1], self.connection_id):
             
             return True
     
@@ -162,7 +162,7 @@ class WebModel:
         
         self.reset_conditions()
         
-        if SqlClass.query(SqlClass, sql, self.connection_id):
+        if SqlClass.query(SqlClass, sql, self.conditions[1], self.connection_id):
             
             return True
         """
@@ -179,7 +179,7 @@ class WebModel:
 
     def reset_conditions(self):
 
-        self.conditions="WHERE 1=1"
+        self.conditions=["WHERE 1=1", []]
         
     
     # A method for select fields from a table in db. Support for foreignkeys.
@@ -228,7 +228,7 @@ class WebModel:
                 
                 # Add a condition to sql query for join the two tables.
                 
-                conditions+=" AND `"+table_name+"`.`"+self.fields[field].identifier_field+"`=`"+self.name+"`.`"+field+"`"
+                conditions[0]+=" AND `"+table_name+"`.`"+self.fields[field].identifier_field+"`=`"+self.name+"`.`"+field+"`"
                 
                 # Add extra fields from related table from select_fields ForeignKeyField class member
                 
@@ -250,13 +250,13 @@ class WebModel:
             self.query_error="Error: without fields to search"
             return False
         
-        sql= ("select "+", ".join(final_fields)+extra_sql_field+" from "+", ".join(tables_to_select)+' '+conditions+' '+self.order_by+' '+self.limit).strip()
+        sql= ("select "+", ".join(final_fields)+extra_sql_field+" from "+", ".join(tables_to_select)+' '+conditions[0]+' '+self.order_by+' '+self.limit).strip()
         
         self.last_query=sql
         
         self.reset_conditions()
         
-        cursor=SqlClass.query(SqlClass, sql, self.connection_id)
+        cursor=SqlClass.query(SqlClass, sql, conditions[1], self.connection_id)
         
         if cursor==False:
             self.query_error=SqlClass.error_connection
@@ -276,7 +276,7 @@ class WebModel:
     
     def element_exists(self, id):
         
-        self.conditions='WHERE `'+self.name_field_id+'`='+str(id)
+        self.conditions=['WHERE `'+self.name_field_id+'`=?', [str(id)]]
         
         count=self.select_count(self.name_field_id)
         
@@ -292,7 +292,7 @@ class WebModel:
     
     def select_a_row(self, id, fields_selected=[], raw_query=0):
         
-        self.conditions='WHERE `'+self.name+'`.`'+self.name_field_id+'`='+str(id)
+        self.conditions=['WHERE `'+self.name+'`.`'+self.name_field_id+'`=?', [str(id)]]
         
         self.limit="limit 1"
         
@@ -367,7 +367,7 @@ class WebModel:
                 
         sql= "select count(`"+field_to_count+"`) from "+", ".join(tables_to_select)+' '+conditions
         
-        cursor=SqlClass.query(SqlClass, sql, self.connection_id)
+        cursor=SqlClass.query(SqlClass, sql, conditions[1], self.connection_id)
         
         count=list(cursor.fetchone().values())[0]
         
@@ -440,15 +440,15 @@ class WebModel:
         
         for field in fields_to_modify:
             print("---Updating "+field+" in "+self.name)
-            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` MODIFY `'+field+'` '+self.fields[field].get_type_sql())
+            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` MODIFY `'+field+'` '+self.fields[field].get_type_sql(), self.conditions[1], self.connection_id)
         
         for field in fields_to_add:
             print("---Adding "+field+" in "+self.name)
-            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` ADD `'+field+'` '+self.fields[field].get_type_sql())
+            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` ADD `'+field+'` '+self.fields[field].get_type_sql(), self.conditions[1], self.connection_id)
             
         for field in fields_to_add_index:
             print("---Adding index to "+field+" in "+self.name)
-            WebModel.query(WebModel, 'CREATE INDEX `index_'+self.name+'_'+field+'` ON '+self.name+' (`'+field+'`);')
+            WebModel.query(WebModel, 'CREATE INDEX `index_'+self.name+'_'+field+'` ON '+self.name+' (`'+field+'`);', self.conditions[1], self.connection_id)
             
         for field in fields_to_add_constraint:
             
@@ -458,37 +458,37 @@ class WebModel:
                 
             id_table_related=self.fields[field].table_id
             
-            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` ADD CONSTRAINT `'+field+'_'+self.name+'IDX` FOREIGN KEY ( `'+field+'` ) REFERENCES `'+table_related+'` (`'+id_table_related+'`) ON DELETE RESTRICT ON UPDATE RESTRICT;')
+            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` ADD CONSTRAINT `'+field+'_'+self.name+'IDX` FOREIGN KEY ( `'+field+'` ) REFERENCES `'+table_related+'` (`'+id_table_related+'`) ON DELETE RESTRICT ON UPDATE RESTRICT;', self.conditions[1], self.connection_id)
             
         for field in fields_to_add_unique:
             
             print("---Adding unique to "+field+" in "+self.name)
             
-            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` ADD UNIQUE (`'+field+'`)')
+            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` ADD UNIQUE (`'+field+'`)', self.conditions[1], self.connection_id)
             
         for field in fields_to_delete_index:
             
             print("---Deleting index from "+field+" in "+self.name)
             
-            WebModel.query(WebModel, 'DROP INDEX `index_'+self.name+'_'+field+'` ON '+self.name)
+            WebModel.query(WebModel, 'DROP INDEX `index_'+self.name+'_'+field+'` ON '+self.name, self.conditions[1], self.connection_id)
         
         for field in fields_to_delete_unique:
             
             print("---Deleting unique from "+field+" in "+self.name)
             
-            WebModel.query(WebModel, 'DROP INDEX `'+field+'` ON '+self.name)
+            WebModel.query(WebModel, 'DROP INDEX `'+field+'` ON '+self.name, self.conditions[1], self.connection_id)
         
         for field in fields_to_delete_constraint:
             
             print("---Deleting foreignkey from "+field+" in "+self.name)
             
-            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` DROP FOREIGN KEY '+field+'_'+self.name+'IDX')
+            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` DROP FOREIGN KEY '+field+'_'+self.name+'IDX', self.conditions[1], self.connection_id)
         
         for field in fields_to_delete:
             
             print("---Deleting "+field+" from "+self.name)
             
-            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` DROP `'+field+'`')
+            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` DROP `'+field+'`', self.conditions[1], self.connection_id)
             #Deleting indexes and constraints.
         
     # Method for drop sql tables and related
