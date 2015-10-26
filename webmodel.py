@@ -158,7 +158,7 @@ class WebModel:
         except: 
             return False
         
-        sql="update `"+self.name+"` SET "+", ".join(update_values)+" "+self.conditions
+        sql="update `"+self.name+"` SET "+", ".join(update_values)+" "+self.conditions[0]
         
         self.reset_conditions()
         
@@ -276,7 +276,7 @@ class WebModel:
     
     def element_exists(self, id):
         
-        self.conditions=['WHERE `'+self.name_field_id+'`=?', [str(id)]]
+        self.conditions=['WHERE `'+self.name_field_id+'`=%s', [id]]
         
         count=self.select_count(self.name_field_id)
         
@@ -292,7 +292,7 @@ class WebModel:
     
     def select_a_row(self, id, fields_selected=[], raw_query=0):
         
-        self.conditions=['WHERE `'+self.name+'`.`'+self.name_field_id+'`=?', [str(id)]]
+        self.conditions=['WHERE `'+self.name+'`.`'+self.name_field_id+'`=%s', [id]]
         
         self.limit="limit 1"
         
@@ -383,7 +383,7 @@ class WebModel:
         
         #Need delete rows from other related tables save in self.related_models_deleted
         
-        return "delete from "+self.name+" "+conditions
+        return "delete from "+self.name+" "+self.conditions[0]
     
     # Method for create sql tables
     
@@ -440,15 +440,15 @@ class WebModel:
         
         for field in fields_to_modify:
             print("---Updating "+field+" in "+self.name)
-            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` MODIFY `'+field+'` '+self.fields[field].get_type_sql(), self.conditions[1], self.connection_id)
+            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` MODIFY `'+field+'` '+self.fields[field].get_type_sql(), [], self.connection_id)
         
         for field in fields_to_add:
             print("---Adding "+field+" in "+self.name)
-            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` ADD `'+field+'` '+self.fields[field].get_type_sql(), self.conditions[1], self.connection_id)
+            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` ADD `'+field+'` '+self.fields[field].get_type_sql(), [], self.connection_id)
             
         for field in fields_to_add_index:
             print("---Adding index to "+field+" in "+self.name)
-            WebModel.query(WebModel, 'CREATE INDEX `index_'+self.name+'_'+field+'` ON '+self.name+' (`'+field+'`);', self.conditions[1], self.connection_id)
+            WebModel.query(WebModel, 'CREATE INDEX `index_'+self.name+'_'+field+'` ON '+self.name+' (`'+field+'`);', [], self.connection_id)
             
         for field in fields_to_add_constraint:
             
@@ -458,37 +458,37 @@ class WebModel:
                 
             id_table_related=self.fields[field].table_id
             
-            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` ADD CONSTRAINT `'+field+'_'+self.name+'IDX` FOREIGN KEY ( `'+field+'` ) REFERENCES `'+table_related+'` (`'+id_table_related+'`) ON DELETE RESTRICT ON UPDATE RESTRICT;', self.conditions[1], self.connection_id)
+            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` ADD CONSTRAINT `'+field+'_'+self.name+'IDX` FOREIGN KEY ( `'+field+'` ) REFERENCES `'+table_related+'` (`'+id_table_related+'`) ON DELETE RESTRICT ON UPDATE RESTRICT;', [], self.connection_id)
             
         for field in fields_to_add_unique:
             
             print("---Adding unique to "+field+" in "+self.name)
             
-            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` ADD UNIQUE (`'+field+'`)', self.conditions[1], self.connection_id)
+            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` ADD UNIQUE (`'+field+'`)', [], self.connection_id)
             
         for field in fields_to_delete_index:
             
             print("---Deleting index from "+field+" in "+self.name)
             
-            WebModel.query(WebModel, 'DROP INDEX `index_'+self.name+'_'+field+'` ON '+self.name, self.conditions[1], self.connection_id)
+            WebModel.query(WebModel, 'DROP INDEX `index_'+self.name+'_'+field+'` ON '+self.name, [], self.connection_id)
         
         for field in fields_to_delete_unique:
             
             print("---Deleting unique from "+field+" in "+self.name)
             
-            WebModel.query(WebModel, 'DROP INDEX `'+field+'` ON '+self.name, self.conditions[1], self.connection_id)
+            WebModel.query(WebModel, 'DROP INDEX `'+field+'` ON '+self.name, [], self.connection_id)
         
         for field in fields_to_delete_constraint:
             
             print("---Deleting foreignkey from "+field+" in "+self.name)
             
-            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` DROP FOREIGN KEY '+field+'_'+self.name+'IDX', self.conditions[1], self.connection_id)
+            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` DROP FOREIGN KEY '+field+'_'+self.name+'IDX', [], self.connection_id)
         
         for field in fields_to_delete:
             
             print("---Deleting "+field+" from "+self.name)
             
-            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` DROP `'+field+'`', self.conditions[1], self.connection_id)
+            WebModel.query(WebModel, 'ALTER TABLE `'+self.name+'` DROP `'+field+'`', [], self.connection_id)
             #Deleting indexes and constraints.
         
     # Method for drop sql tables and related
