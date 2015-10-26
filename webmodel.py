@@ -363,9 +363,9 @@ class WebModel:
                 
                 # Add a condition to sql query for join the two tables.
                 
-                conditions+=" AND `"+table_name+"`.`"+self.fields[field].identifier_field+"`=`"+self.name+"`.`"+field+"`"
+                conditions[0]+=" AND `"+table_name+"`.`"+self.fields[field].identifier_field+"`=`"+self.name+"`.`"+field+"`"
                 
-        sql= "select count(`"+field_to_count+"`) from "+", ".join(tables_to_select)+' '+conditions
+        sql= "select count(`"+field_to_count+"`) from "+", ".join(tables_to_select)+conditions[0]
         
         cursor=SqlClass.query(SqlClass, sql, conditions[1], self.connection_id)
         

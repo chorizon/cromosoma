@@ -52,7 +52,10 @@ class SqlClass:
                 e = sys.exc_info()[0]
                 v = sys.exc_info()[1]
                 
-                self.error_connection="Error in query ||"+cursor._last_executed+"||: %s %s" % (e, v)
+                if hasattr(cursor, '_last_executed'):
+                   sql_query=cursor._last_executed 
+                
+                self.error_connection="Error in query ||"+sql_query+"||: %s %s" % (e, v)
             
                 #return False
                 raise NameError(self.error_connection)
