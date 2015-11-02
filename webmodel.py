@@ -383,7 +383,9 @@ class WebModel:
         
         #Need delete rows from other related tables save in self.related_models_deleted
         
-        return "delete from "+self.name+" "+conditions
+        sql="delete from "+self.name+" "+self.conditions
+        
+        return SqlClass.query(SqlClass, sql, self.connection_id)
     
     # Method for create sql tables
     
