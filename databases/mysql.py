@@ -34,7 +34,7 @@ class SqlClass:
     
     #Make def query more simple if not debugging.
     
-    def query(self, sql_query, name_connection="default"):
+    def query(self, sql_query, arguments=[], name_connection="default"):
         
         #if fetch_type=="ASSOC":
             #fetch_type=pymysql.cursors.DictCursor
@@ -43,7 +43,7 @@ class SqlClass:
             
             try:
                 
-                cursor.execute(sql_query)
+                cursor.execute(sql_query, arguments)
                 self.connection[name_connection].commit()
                 
                 return cursor
@@ -51,6 +51,9 @@ class SqlClass:
             except:
                 e = sys.exc_info()[0]
                 v = sys.exc_info()[1]
+                
+                if hasattr(cursor, '_last_executed'):
+                   sql_query=cursor._last_executed 
                 
                 self.error_connection="Error in query ||"+sql_query+"||: %s %s" % (e, v)
             
