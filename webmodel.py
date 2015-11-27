@@ -30,7 +30,7 @@ class WebModel:
     
     model=OrderedDict()
     
-    connections={'default': {'host': 'localhost', 'user': 'user', 'password': '', 'db': 'default', 'charset': 'utf8mb4', 'set_connection': False} }
+    connections={'default': {'host': 'localhost', 'user': 'user', 'password': '', 'db': 'default', 'charset': 'utf8', 'set_connection': False} }
         
     connection_id="default"
     
@@ -82,6 +82,8 @@ class WebModel:
         self.register(PrimaryKeyField(self.name_field_id))
         
         self.model[name]=self
+        
+        self.yes_reset_conditions=True
         
     
     # A method for register the fields
@@ -135,8 +137,6 @@ class WebModel:
         
         sql="insert into `"+self.name+"` (`"+"`, `".join(fields)+"`) VALUES ("+", ".join(values)+")"
         
-        self.reset_conditions()
-        
         if SqlClass.query(SqlClass, sql, self.conditions[1], self.connection_id):
             
             return True
@@ -160,9 +160,10 @@ class WebModel:
         
         sql="update `"+self.name+"` SET "+", ".join(update_values)+" "+self.conditions[0]
         
-        self.reset_conditions()
-        
         if SqlClass.query(SqlClass, sql, self.conditions[1], self.connection_id):
+            
+            if self.yes_reset_conditions:
+                self.reset_conditions()
             
             return True
         """
@@ -254,7 +255,8 @@ class WebModel:
         
         self.last_query=sql
         
-        self.reset_conditions()
+        if self.yes_reset_conditions:
+            self.reset_conditions()
         
         cursor=SqlClass.query(SqlClass, sql, conditions[1], self.connection_id)
         
@@ -280,7 +282,8 @@ class WebModel:
         
         count=self.select_count(self.name_field_id)
         
-        self.reset_conditions()
+        if self.yes_reset_conditions:
+            self.reset_conditions()
         
         if count>0:
             return True
@@ -296,7 +299,7 @@ class WebModel:
         
         self.limit="limit 1"
         
-        cursor=self.select(arr_select, raw_query)
+        cursor=self.select(fields_selected, raw_query)
         
         self.reset_conditions()
         
@@ -309,8 +312,6 @@ class WebModel:
         self.limit="limit 1"
         
         cursor=self.select(fields_selected, raw_query)
-        
-        self.reset_conditions()
         
         row=cursor.fetchone()
         
@@ -371,6 +372,9 @@ class WebModel:
         
         count=list(cursor.fetchone().values())[0]
         
+        if self.yes_reset_conditions:
+            self.reset_conditions()
+        
         return count
         
         #+' ORDER BY '+self.order_by+' '+self.limit).strip()
@@ -383,9 +387,14 @@ class WebModel:
         
         #Need delete rows from other related tables save in self.related_models_deleted
         
-        sql="delete from "+self.name+" "+self.conditions[0]
+        sql="delete from `"+self.name+"` "+self.conditions[0]
         
-        return SqlClass.query(SqlClass, sql, self.connection_id)
+        result=SqlClass.query(SqlClass, sql, self.conditions[1], self.connection_id)
+        
+        if self.yes_reset_conditions:
+            self.reset_conditions()
+        
+        return result
     
     # Method for create sql tables
     
@@ -613,10 +622,14 @@ class WebModel:
     
     #Create a form based in table.
     
-    def create_forms(self):
+    def create_forms(self, arr_fields={}):
         
-        for name_field, field in self.fields.items():
-            self.forms[name_field]=field.create_form()
+        if len(arr_fields)==0:
+            arr_fields=self.fields.keys()
+        
+        #for name_field, field in self.fields.items():
+        for name_field in arr_fields:
+            self.forms[name_field]=self.fields[name_field].create_form()
             
     def create_form_after(field_after, new_form):
         
@@ -729,7 +742,7 @@ class PhangoField:
 
     def check(self, value):
         
-        error=None
+        self.error=False
         
         value=str(value)
         
@@ -750,6 +763,7 @@ class PhangoField:
         form.default_value=self.default_value
         form.required=self.required
         form.label=self.label
+        form.field=self
         return form
 
 class PrimaryKeyField(PhangoField):
@@ -758,16 +772,20 @@ class PrimaryKeyField(PhangoField):
         super(PrimaryKeyField, self).__init__(name, size, required)
         self.protected=True
         self.name_form=HiddenForm
+        self.required=True
     
     def check(self, value):
         
         error=None
         
+        if value=='':
+            value='0'
+        
         value=str(int(value))
         
         if value==0:
-            txt_error="The value is zero"
-            error=True
+            self.txt_error="The value is zero"
+            self.error=True
             
         
         return value
@@ -775,4 +793,7 @@ class PrimaryKeyField(PhangoField):
     def get_type_sql(self):
 
         return 'INT NOT NULL PRIMARY KEY AUTO_INCREMENT'
+    
+
+            
     

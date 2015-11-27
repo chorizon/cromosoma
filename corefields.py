@@ -34,7 +34,20 @@ class PasswordField(PhangoField):
         self.protected=True
         self.name_form=coreforms.PasswordForm
         self.default_value=''
-    
+    """
+    def check(self, value):
+        
+        error=None
+        
+        if value=='':
+            value=0
+        
+        if value==0:
+            txt_error="The value is zero"
+            error=True
+            
+        return value
+    """
 
 class ForeignKeyField(IntegerField):
     

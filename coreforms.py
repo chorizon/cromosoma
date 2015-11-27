@@ -13,7 +13,9 @@ class BaseForm:
         self.default_value=value
         self.css=''
         self.type='text'
+        self.field=None
         self.required=False
+        self.txt_error=''
         
     def form(self):
         
@@ -22,6 +24,8 @@ class BaseForm:
     #Method for escape value for html input
     
     def setform(self, value):
+        
+        value=str(value)
         
         return value.replace('"', '\"')
 
