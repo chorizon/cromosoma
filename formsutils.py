@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from cromosoma import corefields
-from bottle import request, FormsDict
+from bottle import request
 
 def pass_values_to_form(post, arr_form, yes_error=True):
     
@@ -26,20 +26,12 @@ def pass_values_to_form(post, arr_form, yes_error=True):
     return arr_form
 
 def show_form(post, arr_form, t, yes_error=True):
-    
-    pass_values_to_form(post, arr_form, yes_error)
-    
-    return t.load_template('forms/modelform.phtml', forms=arr_form)
+        
+        pass_values_to_form(post, arr_form, yes_error)
+        
+        return t.load_template('forms/modelform.phtml', forms=arr_form)
 
-# Need this for obtain utf8 valid values
 
-def obtain_get():
-    
-    return request.query.decode()
+        
 
-def obtain_post():
-    
-    return request.forms.decode()
-    
-    
     
