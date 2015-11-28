@@ -21,13 +21,13 @@ class BaseForm:
         
         return '<input type="'+self.type+'" class="'+self.css+'" name="'+self.name+'" value="'+self.setform(self.default_value)+'">'
     
-    #Method for escape value for html input
+    #Method for escape value for html input. DON'T CHANGE IF YOU DON'T KNOWN WHAT ARE YOU DOING
     
     def setform(self, value):
         
         value=str(value)
         
-        return value.replace('"', '\"')
+        return value.replace('"', '&quot;')
 
 class TextForm(BaseForm):
     
