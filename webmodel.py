@@ -128,6 +128,8 @@ class WebModel:
 
         self.connect_to_db()
         
+        self.query_error=''
+        
         try:
             
             fields, values, update_values=self.check_all_fields(dict_values, external_agent)
@@ -137,9 +139,14 @@ class WebModel:
         
         sql="insert into `"+self.name+"` (`"+"`, `".join(fields)+"`) VALUES ("+", ".join(values)+")"
         
-        if SqlClass.query(SqlClass, sql, self.conditions[1], self.connection_id):
+        cursor=SqlClass.query(SqlClass, sql, self.conditions[1], self.connection_id)
+        
+        if cursor.rowcount>0:
             
             return True
+        else:
+            self.query_error='Cannot insert the new row'
+            return False
     
     # Update method. For update one or many rows.
     
@@ -148,6 +155,8 @@ class WebModel:
         # Connect to db
 
         self.connect_to_db()
+        
+        self.query_error=''
         
         #try:
         
@@ -160,12 +169,21 @@ class WebModel:
         
         sql="update `"+self.name+"` SET "+", ".join(update_values)+" "+self.conditions[0]
         
-        if SqlClass.query(SqlClass, sql, self.conditions[1], self.connection_id):
+        cursor=SqlClass.query(SqlClass, sql, self.conditions[1], self.connection_id)
+        
+        if cursor.rowcount>0:
             
             if self.yes_reset_conditions:
                 self.reset_conditions()
             
             return True
+        
+        else:
+            
+            self.query_error='Cannot update the row'
+            
+            return False
+        
         """
         except:
             
@@ -197,6 +215,8 @@ class WebModel:
         final_fields=[]
         
         extra_fields=[]
+        
+        self.query_error=''
         
         #First table selecction
         
@@ -549,6 +569,10 @@ class WebModel:
                 # If fields is not protected always insert if not error checking
                 
                 value=dict_values[k]
+                
+                # Need rewrite the error because shitty python don't clean nothing
+                
+                self.fields[k].error=False
                 
                 if self.fields[k].protected==None or external_agent==False:
                     
