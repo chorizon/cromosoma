@@ -8,14 +8,20 @@ class IntegerField(PhangoField):
     
     def check(self, value):
         
-        error=None
+        self.error=None
+        self.txt_error=''
         
-        value=str(int(value))
+        try:
         
-        if value==0:
-            txt_error="The value is zero"
-            error=True
+            value=str(int(value))
+        
+            if value==0 and self.required==True:
+                self.txt_error="The value is zero"
+                self.error=True
+        except:
             
+            self.error=True
+
         return value
     
     def get_type_sql(self):
@@ -25,29 +31,6 @@ class IntegerField(PhangoField):
 class CharField(PhangoField):
     
     pass
-
-class PasswordField(PhangoField):
-    
-    def __init__(self, name, size=255, required=False):
-        
-        super(PasswordField, self).__init__(name, size, required)    
-        self.protected=True
-        self.name_form=coreforms.PasswordForm
-        self.default_value=''
-    """
-    def check(self, value):
-        
-        error=None
-        
-        if value=='':
-            value=0
-        
-        if value==0:
-            txt_error="The value is zero"
-            error=True
-            
-        return value
-    """
 
 class ForeignKeyField(IntegerField):
     
@@ -66,4 +49,24 @@ class ForeignKeyField(IntegerField):
         super(ForeignKeyField, self).__init__(name, size, required)
     
         self.foreignkey=True
+
+class BooleanField(IntegerField):
+    
+    def check(self, value):
         
+        self.error=None
+        self.txt_error=''
+        
+        value=str(int(value))
+        
+        if value<0 or value>1:
+            txt_error="This value is boolean"
+            self.error=True
+            
+        return value
+    
+    def get_type_sql(self):
+
+        return 'BOOLEAN NOT NULL DEFAULT "0"'
+    
+    

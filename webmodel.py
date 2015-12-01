@@ -36,11 +36,11 @@ class WebModel:
     
     # Init the class
     
-    def __init__(self, name, name_field_id="id"):
+    def __init__(self, name_field_id="id"):
         
         #The name of the table
         
-        self.name=name
+        self.name=type(self).__name__.lower()
         
         self.name_field_id=name_field_id
         
@@ -81,10 +81,17 @@ class WebModel:
         #Create id field
         self.register(PrimaryKeyField(self.name_field_id))
         
-        self.model[name]=self
+        #self.model[name]=self
         
         self.yes_reset_conditions=True
         
+        self.create_fields()
+    
+    # A method where create the new fields of this model
+    
+    def create_fields(self):
+        
+        pass
     
     # A method for register the fields
     
@@ -130,9 +137,13 @@ class WebModel:
         
         self.query_error=''
         
+        self.fields[self.name_field_id].required=False
+        
         try:
             
             fields, values, update_values=self.check_all_fields(dict_values, external_agent)
+            
+            self.query_error='Cannot insert the new row'
             
         except: 
             return False
@@ -767,6 +778,7 @@ class PhangoField:
     def check(self, value):
         
         self.error=False
+        self.txt_error=''
         
         value=str(value)
         
@@ -800,7 +812,8 @@ class PrimaryKeyField(PhangoField):
     
     def check(self, value):
         
-        error=None
+        self.error=None
+        self.txt_error=''
         
         if value=='':
             value='0'

@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 import argparse
-import os
-import sys
+import os,traceback
+import sys, inspect
 import shutil
 from datetime import date
 from pathlib import Path
@@ -49,11 +49,26 @@ def start():
     
         model=import_module(args.model)
         
+        for name, obj in inspect.getmembers(sys.modules[model.__name__]):
+            if inspect.isclass(obj):
+                if obj.__module__==args.model:
+                    
+                    WebModel.model[name.lower()]=obj()
+                    
+                    
+                    #WebModel.modelobj
+        
     except:
+        """
         e = sys.exc_info()[0]
         v = sys.exc_info()[1]
             
         print(Fore.WHITE+Back.RED+Style.BRIGHT +"Error, file with model not found: %s %s" % (e, v))
+        """
+        print("Exception in user code:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stdout)
+        print("-"*60)
         
         exit(1)
 
@@ -115,7 +130,13 @@ def start():
     
     try:
     
-        import_module('backups.'+args.model)
+        model_old=import_module('backups.'+args.model)
+        
+        for name, obj in inspect.getmembers(sys.modules[model_old.__name__]):
+            if inspect.isclass(obj):
+                if obj.__module__=='backups.'+args.model:
+                    
+                    WebModel.model['old_'+name.lower()]=obj()
         
         print(Style.BRIGHT+"Checking old versions of model for find changes...")
         
@@ -254,10 +275,10 @@ def start():
     
     except:
         
-        e = sys.exc_info()[0]
-        v = sys.exc_info()[1]
-            
-        print(Fore.WHITE+Back.RED+Style.BRIGHT +"Error: %s %s" % (e, v))
+        print("Exception in user code:")
+        print("-"*60)
+        traceback.print_exc(file=sys.stdout)
+        print("-"*60)
         
         exit(1)
     
@@ -299,13 +320,14 @@ def create_backup(original_file_path, file_path):
     f=open(original_file_path)
     
     for line in f:
+        """
         new_line=line.replace("model[\"", "model[\"old_")
         new_line=new_line.replace("model['", "model['old_")
         
         new_line=new_line.replace("WebModel(\"", "WebModel(\"old_")
         new_line=new_line.replace("WebModel('", "WebModel('old_")
-        
-        new_file+=new_line
+        """
+        new_file+=line
     
     f.close()
     

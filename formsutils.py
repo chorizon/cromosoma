@@ -27,11 +27,11 @@ def pass_values_to_form(post, arr_form, yes_error=True):
 
     return arr_form
 
-def show_form(post, arr_form, t, yes_error=True):
+def show_form(post, arr_form, t, yes_error=True, modelform_tpl='forms/modelform.phtml'):
         
         pass_values_to_form(post, arr_form, yes_error)
         
-        return t.load_template('forms/modelform.phtml', forms=arr_form)
+        return t.load_template(modelform_tpl, forms=arr_form)
 
 
         
