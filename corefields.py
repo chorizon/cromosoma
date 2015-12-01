@@ -54,15 +54,24 @@ class BooleanField(IntegerField):
     
     def check(self, value):
         
-        self.error=None
+        self.error=False
         self.txt_error=''
         
-        value=str(int(value))
+        try:
         
-        if value<0 or value>1:
-            txt_error="This value is boolean"
-            self.error=True
+            value=int(value)
             
+            if value<0 or value>1:
+                self.txt_error="Need 0 or 1 value"
+                self.error=True
+
+        except:
+            
+            self.error=True
+            value=0
+
+        value=str(value)
+
         return value
     
     def get_type_sql(self):

@@ -585,7 +585,7 @@ class WebModel:
                 
                 self.fields[k].error=False
                 
-                if self.fields[k].protected==None or external_agent==False:
+                if self.fields[k].protected==None or self.fields[k].protected==False or external_agent==False:
                     
                     self.fields[k].update=updated_field[errors_set]
                     
@@ -610,6 +610,14 @@ class WebModel:
                         values.append(final_value)
                         
                         update_values.append(f_update(k, final_value))
+                        
+                else:
+                    self.num_errors+=1
+                
+                    self.fields_errors[k].append("Error: "+self.fields[k].label+" is protected field")
+                    self.fields[k].error=True
+                    self.fields[k].txt_error="Error: "+self.fields[k].label+" is protected field"
+                    error=True
             
             elif v.required==True:
                 

@@ -15,8 +15,8 @@ class PasswordField(PhangoField):
         
         self.txt_error=''
         self.error=False
-        
-        value=value.strip()
+        print(value)
+        value.strip()
         
         if value=='':
             
@@ -26,9 +26,10 @@ class PasswordField(PhangoField):
         else:
             value = bcrypt.encrypt(value)
             
-
+        
         return value
     
-    def verify(self, password, h):
+    @staticmethod
+    def verify( password, h):
         
         return bcrypt.verify(password, h)
