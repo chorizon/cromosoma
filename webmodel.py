@@ -335,6 +335,9 @@ class WebModel:
         self.reset_conditions()
         
         row=cursor.fetchone()
+        
+        if row==None:
+            row=False
 
         return row
     
@@ -345,6 +348,9 @@ class WebModel:
         cursor=self.select(fields_selected, raw_query)
         
         row=cursor.fetchone()
+        
+        if row==None:
+            row=False
         
         return row
     

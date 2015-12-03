@@ -33,7 +33,9 @@ def show_form(post, arr_form, t, yes_error=True, modelform_tpl='forms/modelform.
         
         return t.load_template(modelform_tpl, forms=arr_form)
 
+#Function for initial values for necessary fields.
 
-        
+def ini_fields(fields):
+    pass
 
     
