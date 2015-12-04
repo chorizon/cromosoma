@@ -42,6 +42,10 @@ class WebModel:
         
         self.name=type(self).__name__.lower()
         
+        self.label=self.name
+        
+        self.label_general=self.name
+        
         self.name_field_id=name_field_id
         
         #Fields of the table, inserte with register method
@@ -86,6 +90,10 @@ class WebModel:
         self.yes_reset_conditions=True
         
         self.create_fields()
+        
+        self.updated=False
+        
+        self.valid_fields=[]
     
     # A method where create the new fields of this model
     
@@ -101,7 +109,7 @@ class WebModel:
         
         self.fields[field_model.name]=field_model
         
-        self.fields[field_model.name].name_model=self.name
+        self.fields[field_model.name].model=self
     
     # A method for create the id field.
     
@@ -164,12 +172,18 @@ class WebModel:
     def update(self, dict_values, external_agent=True):
         
         # Connect to db
+        
+        self.fields[self.name_field_id].required=False
+        
+        if self.name_field_id in dict_values:
+            del dict_values[self.name_field_id]
 
         self.connect_to_db()
         
         self.query_error=''
         
         #try:
+        self.updated=True
         
         try:
             
@@ -182,6 +196,12 @@ class WebModel:
         
         cursor=SqlClass.query(SqlClass, sql, self.conditions[1], self.connection_id)
         
+        if self.yes_reset_conditions:
+            self.reset_conditions()
+        
+        return True
+        
+        """
         if cursor.rowcount>0:
             
             if self.yes_reset_conditions:
@@ -194,7 +214,7 @@ class WebModel:
             self.query_error='Cannot update the row'
             
             return False
-        
+        """
         """
         except:
             
@@ -557,7 +577,7 @@ class WebModel:
         values=[]
         update_values=[]
         self.errors[errors_set]=[]
-        
+        self.num_errors=0
         #A dictionary that define if update property is added
         
         updated_field={}
@@ -591,35 +611,38 @@ class WebModel:
                 
                 self.fields[k].error=False
                 
-                if self.fields[k].protected==None or self.fields[k].protected==False or external_agent==False:
+                if (self.fields[k].protected==None or self.fields[k].protected==False or external_agent==False) and k in self.valid_fields:
                     
                     self.fields[k].update=updated_field[errors_set]
                     
                     value=self.fields[k].check(value)
                     
-                    # If error checking, value=False
-                    
-                    if self.fields[k].error==True and self.fields[k].required==True:
+                    if self.fields[k].check_blank==False or self.updated==False:
                         
-                        #Error, need this fields.
-                        self.num_errors+=1
+                        # If error checking, value=False
                         
-                        self.fields_errors[k].append("Error: "+v.label+" field required")
-                        
-                        error=True
-                        
-                    else:
-                        fields.append(k)
-                        
-                        final_value=self.fields[k].quot_open+value+self.fields[k].quot_close
-                        
-                        values.append(final_value)
-                        
-                        update_values.append(f_update(k, final_value))
+                        if self.fields[k].error==True and self.fields[k].required==True:
+                            
+                            #Error, need this fields.
+                            self.num_errors+=1
+                            
+                            self.fields_errors[k].append("Error: "+v.label+" field required")
+                            
+                            error=True
+                            
+                        else:
+
+                            fields.append(k)
+                            
+                            final_value=self.fields[k].quot_open+value+self.fields[k].quot_close
+                            
+                            values.append(final_value)
+                            
+                            update_values.append(f_update(k, final_value))
                         
                 else:
                     self.num_errors+=1
-                
+                    
                     self.fields_errors[k].append("Error: "+self.fields[k].label+" is protected field")
                     self.fields[k].error=True
                     self.fields[k].txt_error="Error: "+self.fields[k].label+" is protected field"
@@ -647,7 +670,7 @@ class WebModel:
             self.errors[errors_set].append("Error: error checking the values of the table")
             
             return False
-    
+        
         return (fields, values, update_values)
     
     
@@ -678,6 +701,7 @@ class WebModel:
         
         #for name_field, field in self.fields.items():
         for name_field in arr_fields:
+            self.valid_fields.append(name_field)
             self.forms[name_field]=self.fields[name_field].create_form()
             
     def create_form_after(field_after, new_form):
@@ -747,9 +771,9 @@ class PhangoField:
         # Array for create initial parameters for form..
         self.parameters=[]
         
-        # The name of the model where this component or field live
+        # Themodel where this component or field live
     
-        self.name_model=''
+        self.model=None
         
         # Property used for set this field how indexed in the database table.
 
@@ -769,7 +793,11 @@ class PhangoField:
      
         # Property that define if this field is in an update operation or insert operation
         
-        self.update=0
+        self.update=False
+        
+        # Property used for check if this value cannot change if is in blank and is filled
+        
+        self.check_blank=False
         
         # Define the form, when is created forms with create_forms you can change the properties of this class
         

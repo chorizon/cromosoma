@@ -20,8 +20,20 @@ class PasswordField(PhangoField):
         
         if value=='':
             
-            self.txt_error="The value is empty"
-            self.error=True
+            if self.model!=None:
+            
+                if self.model.updated==True:
+                    self.required=False
+                    self.check_blank=True
+                    return ""
+                else:
+                    
+                    self.txt_error="The value is empty"
+                    self.error=True
+                    
+            else:
+                self.txt_error="The value is empty"
+                self.error=True
             
         else:
             value = bcrypt.encrypt(value)

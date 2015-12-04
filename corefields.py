@@ -1,5 +1,6 @@
 from cromosoma.webmodel import PhangoField
 from cromosoma import coreforms
+from citoplasma.i18n import I18n
 
 class IntegerField(PhangoField):
     
@@ -52,6 +53,15 @@ class ForeignKeyField(IntegerField):
 
 class BooleanField(IntegerField):
     
+    def __init__(self, name, size=1):
+        
+        required=False
+        
+        self.yes=I18n.lang('common', 'yes', 'Yes')
+        self.no=I18n.lang('common', 'no', 'No')
+        
+        super(IntegerField, self).__init__(name, size, required)
+    
     def check(self, value):
         
         self.error=False
@@ -78,4 +88,13 @@ class BooleanField(IntegerField):
 
         return 'BOOLEAN NOT NULL DEFAULT "0"'
     
+    def show_formatted(self, value):
     
+        value=int(value)
+        
+        if value==0:
+            value=self.yes_text
+        else:
+            value=self.no_text
+    
+        return value
