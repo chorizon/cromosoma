@@ -704,13 +704,13 @@ class WebModel:
             self.valid_fields.append(name_field)
             self.forms[name_field]=self.fields[name_field].create_form()
             
-    def create_form_after(field_after, new_form):
+    def create_form_after(self, form_after, new_form):
         
         new_dict=OrderedDict()
         
-        for name_field, field in self.fields.items():
-            new_dict[name_field]=field
-            if name_field==field_after:
+        for name_form, form in self.forms.items():
+            new_dict[name_form]=form
+            if name_form==form_after:
                 new_dict[new_form.name]=new_form
                 
         self.forms=new_dict
