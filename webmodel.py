@@ -151,9 +151,8 @@ class WebModel:
             
             fields, values, update_values=self.check_all_fields(dict_values, external_agent)
             
-            self.query_error='Cannot insert the new row'
-            
         except: 
+            self.query_error='Cannot insert the new row'
             return False
         
         sql="insert into `"+self.name+"` (`"+"`, `".join(fields)+"`) VALUES ("+", ".join(values)+")"

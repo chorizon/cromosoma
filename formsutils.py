@@ -7,6 +7,7 @@ def pass_values_to_form(post, arr_form, yes_error=True):
     
     for key, value in arr_form.items():
         post[key]=post.get(key, '')
+
         arr_form[key].default_value=post[key]
         
         if arr_form[key].field==None:
